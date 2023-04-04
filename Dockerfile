@@ -10,4 +10,4 @@ COPY /target/currency-conversion-service-0.0.1-SNAPSHOT.jar /app/currency-conver
 
 EXPOSE 8100 8000
 
-ENTRYPOINT ["java", "-Dcurrency.exchange.url=http://currency_exchange_service:8000","-jar", "currency-conversion-service.jar"]
+ENTRYPOINT ["java", "-Dcurrency.exchange.url=http://exchange:8000","-jar", "currency-conversion-service.jar"]

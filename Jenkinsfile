@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
         // vars
-        app_name="currency_conversion_service"
+        app_name="conversion"
         app_port=8100
     }
     stages {
