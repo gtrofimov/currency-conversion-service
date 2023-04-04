@@ -6,6 +6,6 @@ WORKDIR /app
 
 COPY /target/currency-conversion-service-0.0.1-SNAPSHOT.jar /app/currency-conversion-service.jar
 
-EXPOSE 8000
+EXPOSE 8100
 
-ENTRYPOINT ["java", "-jar", "currency-conversion-service.jar"]
+ENTRYPOINT ["java", "--currency.exchange.url=http://host.docker.internal:8000","-jar", "currency-conversion-service.jar"]
