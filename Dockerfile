@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.18_10-alpine
+FROM openjdk:11.0.11-jre-slim
 
 LABEL maintainer="gtrofimov@parasoft.com"
 
