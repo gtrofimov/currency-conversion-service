@@ -2,7 +2,7 @@ FROM openjdk:11.0-jdk
 
 LABEL maintainer="gtrofimov@parasoft.com"
 
-RUN apk --no-cache add curl
+#RUN apk --no-cache add curl
 
 WORKDIR /app
 
