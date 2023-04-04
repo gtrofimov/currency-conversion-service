@@ -31,13 +31,13 @@ public class CurrencyConversionController {
 		
 		// get exchange service url
 		String currencyExchangeUrl = environment.getProperty("currency.exchange.url") + "/currency-exchange/from/{from}/to/{to}";
-		
+		System.out.println(currencyExchangeUrl);
 		// calling the currency-exchange-service
 		ResponseEntity<CurrencyConversionBean> responseEntity = new RestTemplate().getForEntity(
 				currencyExchangeUrl, 
 				CurrencyConversionBean.class,
 				uriVariables);
-
+		
 		CurrencyConversionBean response = responseEntity.getBody();
 		// creating a new response bean and getting the response back and taking it into
 		// Bean
