@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-alpine
+FROM openjdk:11.0-jdk
 
 LABEL maintainer="gtrofimov@parasoft.com"
 
