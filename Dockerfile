@@ -1,6 +1,8 @@
-FROM adoptopenjdk/openjdk11
+FROM openjdk:11-jre-alpine
 
 LABEL maintainer="gtrofimov@parasoft.com"
+
+RUN apk --no-cache add curl
 
 WORKDIR /app
 
