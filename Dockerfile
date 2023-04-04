@@ -1,4 +1,4 @@
-FROM openjdk:11.0.11-jre-slim
+FROM adoptopenjdk/openjdk11
 
 LABEL maintainer="gtrofimov@parasoft.com"
 
