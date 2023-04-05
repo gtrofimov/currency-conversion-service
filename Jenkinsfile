@@ -4,25 +4,81 @@ pipeline {
         maven 'maven'
         jdk 'JDK 17'
     }
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
+
     environment {
-        // vars
+        // Application Config
         app_name="conversion"
         app_port=8100
+
+                // Parasoft Licenses
+        ls_url="${PARASOFT_LS_URL}"
+        ls_user="${PARASOFT_LS_USER}"
+        ls_pass="${PARASOFT_LS_PASS}"
+
+        // Parasoft Covarge Agent
+        cov_port=8052
     }
     stages {
         stage('Build') {
-            steps {
+steps {
+                // Clean before build
+                cleanWs()
+                // Checkout project
+                checkout scm
+                
+                echo "Building ${env.JOB_NAME}..."
                 // build the project
                 sh  '''
+                    
 
-                    # Build the Maven project
-                    mvn clean package
-                
+                    # Build the Maven package
+                    # mvn clean package
+                    
+                    # Build the Maven package with Jtest Coverage Agent
+
+                    # Create Folder for monitor
+                    mkdir monitor | true
+
+                    # Set Up and write .properties file
+                    echo $"
+                    parasoft.eula.accepted=true
+                    jtest.license.use_network=true
+                    jtest.license.network.edition=server_edition
+                    license.network.use.specified.server=true
+                    license.network.auth.enabled=true
+                    license.network.url=${ls_url}
+                    license.network.user=${ls_user}
+                    license.network.password=${ls_pass}" >> jtest/jtestcli.properties
+                    
+                    # Debug: Print jtestcli.properties file
+                    cat jtest/jtestcli.properties
+
+                    # Run Maven build with Jtest tasks via Docker
+                    docker run --rm -i \
+                    -u 0:0 \
+                    -v "$PWD:$PWD" \
+                    -w "$PWD" \
+                    $(docker build -q ./jtest) /bin/bash -c " \
+                    mvn \
+                    -DskipTests=true \
+                    package jtest:monitor \
+                    -s /home/parasoft/.m2/settings.xml \
+                    -Djtest.settings='/home/parasoft/jtestcli.properties'; \
+                    "
+
+                    # Unzip monitor.zip
+                    unzip target/*/*/monitor.zip -d .
+                    # ls -la monitor
+                    
                     '''
                 }
             }
         stage('Deploy') {
-            steps {
+                        steps {
                 // deploy the project
                 sh  '''
                     
@@ -33,7 +89,13 @@ pipeline {
                     docker build --no-cache -t ${app_name} .
                     
                     # Start app container
-                    docker run --rm -d -p ${app_port}:${app_port} --network=demo-net --name ${app_name} ${app_name}
+                    docker run --rm -d \
+                    -p ${app_port}:${app_port} \
+                    -p ${cov_port}:8050 \
+                    -v "$PWD/monitor:/monitor" \
+                    --env-file "$PWD/jtest/monitor.env" \
+                    --network=demo-net \
+                    --name ${app_name} ${app_name}
                     
                     # Wait for app conatiner to start
                     sleep 15s
@@ -46,7 +108,9 @@ pipeline {
             steps {
                 // test the project
                 sh  '''
-
+                    # Test the Agent
+                    curl -iv --raw http://localhost:${cov_port}/status
+                    
                     # Test the App
 
                     # check if Currency Exchange Service is running
