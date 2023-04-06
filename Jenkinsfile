@@ -61,8 +61,9 @@ steps {
                     docker run --rm -i \
                     -u 0:0 \
                     -v "$PWD:$PWD" \
+                    -v "$PWD/jtest/jtestcli.properties:/home/parasoft/jtestcli.properties"
                     -w "$PWD" \
-                    $(docker build -q ./jtest) /bin/bash -c " \
+                    jtest:maven /bin/bash -c " \
                     mvn \
                     -DskipTests=true \
                     package jtest:monitor \
