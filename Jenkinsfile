@@ -94,7 +94,7 @@ steps {
                     -p ${app_port}:${app_port} \
                     -p ${cov_port}:8050 \
                     -v "$PWD/monitor:/monitor" \
-                    -e JAVA_OPTS='-Dcurrency.exchange.url=http://exchange:8000' \
+                    -e JAVA_OPTS='$JAVA_OPTS -Dcurrency.exchange.url=http://exchange:8000' \
                     --env-file "$PWD/jtest/monitor.env" \
                     --network=demo-net \
                     --name ${app_name} ${app_name}
