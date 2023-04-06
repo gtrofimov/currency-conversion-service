@@ -24,14 +24,15 @@ pipeline {
     }
     stages {
         stage('Build') {
-steps {
+            steps {
                 // Clean before build
                 cleanWs()
+
                 // Checkout project
                 checkout scm
                 
+                // build the project                
                 echo "Building ${env.JOB_NAME}..."
-                // build the project
                 sh  '''
                     
 
@@ -61,9 +62,8 @@ steps {
                     docker run --rm -i \
                     -u 0:0 \
                     -v "$PWD:$PWD" \
-                    -v "$PWD/jtest/jtestcli.properties:/home/parasoft/jtestcli.properties" \
                     -w "$PWD" \
-                    jtest:maven /bin/bash -c " \
+                    $(docker build -q ./jtest) /bin/bash -c " \
                     mvn \
                     -DskipTests=true \
                     package jtest:monitor \
@@ -79,7 +79,7 @@ steps {
                 }
             }
         stage('Deploy') {
-                        steps {
+            steps {
                 // deploy the project
                 sh  '''
                     
@@ -107,21 +107,45 @@ steps {
             
         stage('Test') {
             steps {
-                // test the project
+               
+                // start cov agent session and test
                 sh  '''
                     # Test the Agent
                     curl -iv --raw http://localhost:${cov_port}/status
                     
-                    # Test the App
+                    # Start the Test
+                    curl -iv --raw http://localhost:${cov_port}/test/start/jenkinsTest${BUILD_NUMBER}
+                    '''
 
+                // run tests
+                sh  '''
                     # check if Currency Exchange Service is running
-                    curl -iv --raw http://localhost:8000/currency-exchange/from/EUR/to/INR
+                    # curl -iv --raw http://localhost:8000/currency-exchange/from/EUR/to/INR
 
                     # test Currency Conversion Service
                     curl -iv --raw http://localhost:8100/currency-converter/from/USD/to/INR/quantity/1000
-
-                    # cov-tool
                 
+                    '''
+
+                // stop cob agent session and generate report
+                sh  '''
+                    # Stop the Test
+                    curl -iv --raw http://localhost:${cov_port}/session/stop
+                
+                    # run Jtest to generate report
+                    docker run --rm -i \
+                    -u 0:0 \
+                    -v "$PWD:$PWD" \
+                    -w "$PWD" \
+                    $(docker build -q ./jtest) \
+                    jtestcli \
+                    -settings /home/parasoft/jtestcli.properties \
+                    -staticcoverage "monitor/static_coverage.xml" \
+                    -runtimecoverage "monitor/runtime_coverage" \
+                    -config "jtest/CalculateApplicationCoverage.properties" \
+                    -property report.coverage.images="${app_name}-ComponentTests" \
+                    -property session.tag="ComponentTests"
+
                     '''
                 }
             }
@@ -137,14 +161,13 @@ steps {
             }
     }
     post {
-        // Clean after build
+        
+        // Clean jtest cache after build
         always {
-            cleanWs(cleanWhenNotBuilt: false,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true,
-                    notFailBuild: true,
-                    patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
-                            [pattern: '.propsfile', type: 'EXCLUDE']])
+            sh  ''' 
+                rm -rf ".jtest/cache"                
+                rm -rf "*/*/*/.jtest/cache" 
+                '''
             }
     }
 }
