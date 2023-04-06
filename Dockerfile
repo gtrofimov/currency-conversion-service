@@ -4,7 +4,7 @@ LABEL maintainer="gtrofimov@parasoft.com"
 
 # Debug
 # RUN apk --no-cache add curl
-ENV JAVA_OPTS="-Dcurrency.exchange.url=http://exchange:8000"
+# ENV JAVA_OPTS="-Dcurrency.exchange.url=http://exchange:8000"
 
 WORKDIR /app
 
