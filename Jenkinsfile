@@ -165,8 +165,8 @@ pipeline {
         // Clean jtest cache after build
         always {
             sh  ''' 
-                rm -rf ".jtest/cache"                
-                rm -rf "*/*/*/.jtest/cache" 
+                #rm -rf ".jtest/cache"                
+                #rm -rf "*/*/*/.jtest/cache" 
                 '''
             }
     }
