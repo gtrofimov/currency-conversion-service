@@ -61,7 +61,7 @@ steps {
                     docker run --rm -i \
                     -u 0:0 \
                     -v "$PWD:$PWD" \
-                    -v "$PWD/jtest/jtestcli.properties:/home/parasoft/jtestcli.properties"
+                    -v "$PWD/jtest/jtestcli.properties:/home/parasoft/jtestcli.properties" \
                     -w "$PWD" \
                     jtest:maven /bin/bash -c " \
                     mvn \
