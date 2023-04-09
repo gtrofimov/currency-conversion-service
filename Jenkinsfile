@@ -73,6 +73,7 @@ pipeline {
 
                     # Unzip monitor.zip
                     unzip target/*/*/monitor.zip -d .
+                    cp monitor/static_coverage.xml monitor/static_coverage_${cov_port}.xml
                     # ls -la monitor
                     
                     '''
@@ -161,13 +162,8 @@ pipeline {
             }
     }
     post {
-        
-        // Clean jtest cache after build
         always {
-            sh  ''' 
-                #rm -rf ".jtest/cache"                
-                #rm -rf "*/*/*/.jtest/cache" 
-                '''
-            }
+            archiveArtifacts artifacts: 'monitor/static_coverage_*.xml', onlyIfSuccessful: true
+        }
     }
 }
