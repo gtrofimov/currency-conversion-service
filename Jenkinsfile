@@ -162,7 +162,14 @@ pipeline {
     }
     post {
         always {
+            // archive static cov xml
             archiveArtifacts artifacts: 'monitor/static_coverage_*.xml', onlyIfSuccessful: true
+            
+            // delete Jtest Cache
+            sh  '''
+                rm -rf ".jtest/cache"                
+                rm -rf "*/*/*/.jtest/cache" 
+                '''
         }
     }
 }
